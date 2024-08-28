@@ -1,0 +1,52 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  workoutEntries WorkoutEntry[] // One-to-many relationship with WorkoutEntry
+}
+
+model WorkoutEntry {
+  id        Int           @id @default(autoincrement())
+  date      DateTime      @default(now())
+  exercises ExerciseEntry[]  // One-to-many relationship with ExerciseEntry
+  
+  userId    Int            // Foreign key to User
+  user      User           @relation(fields: [userId], references: [id])
+}
+
+model ExerciseEntry {
+  id          Int           @id @default(autoincrement())
+  exerciseName String
+  sets        SetEntry[]    // One-to-many relationship with SetEntry
+  
+  workoutId   Int            // Foreign key to WorkoutEntry
+  workout     WorkoutEntry   @relation(fields: [workoutId], references: [id])
+}
+
+model SetEntry {
+  id         Int      @id @default(autoincrement())
+  type       String
+  
+  // Fields for weight-based sets
+  reps       Int?
+  weight     Int?
+  units      String?
+
+  // Fields for time-based sets
+  hours      Int?
+  minutes    Int?
+  seconds    Int?
+  distance   Int?
+  distanceUnits String?
+
+  exerciseId Int      // Foreign key to ExerciseEntry
+  exercise   ExerciseEntry @relation(fields: [exerciseId], references: [id])
+}
